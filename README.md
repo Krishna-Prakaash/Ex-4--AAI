@@ -31,37 +31,35 @@ Find the most likely sequence of hidden states by selecting the hidden state wit
 
 ## Program:
 ```
+#import required libraries
+
 import numpy as np
-t_m = np.array([[0.7,0.3],
-                [0.4, 0.6]])
-e_m = np.array([[0.1,0.9],
-                [0.8,0.2]])
-i_p = np.array([0.5,0.5])
 
-o_s = np.array([1,1,1,0,0,1])
+# input values
 
-alpha = np.zeros((len(o_s),len(i_p)))
+transition_matrix = np.array([[0.7,0.3],[0.4,0.6]])
+emission_matrix = np.array([[0.1,0.9],[0.8,0.2]])
+initial_probabilities=np.array([0.5,0.5])
+observed_sequence= np.array([1,1,1,0,0,1])
 
-alpha[0, :] = i_p * e_m[:, o_s[0]]
+alpha =np.zeros((len(observed_sequence),len(initial_probabilities)))
+alpha[0,:] = initial_probabilities*emission_matrix[:,observed_sequence[0]]
+for t in range(1,len(observed_sequence)):
+  for j in range(len(initial_probabilities)):
+    alpha[t,j] = emission_matrix[j,observed_sequence[t]]*np.sum(alpha[t-1,:]*transition_matrix[:,j])
 
-for t in range(1, len(o_s)):
+probability=np.sum(alpha[-1,:])
+print("The probability of the observed sequence is:", probability)
 
-  for j in range(len(i_p)):
+most_likely_sequence=[]
+for t in range(len(observed_sequence)):
+  if alpha[t,0]> alpha[t,1]:
+    most_likely_sequence.append("sunny")
+  else :
+    most_likely_sequence.append("rainy")
 
-    alpha[t, j ] = e_m[j,o_s[t]] * np.sum(alpha[t-1, :] * t_m[:, j ])
+print("The most likely sequence of weather state is:", most_likely_sequence)
 
-prob = np.sum(alpha[-1, :])
-
-print("The Probability of the observed sequence is :",prob)
-
-m_l_s = []
-for t in range(len(o_s)):
-  if alpha[t, 0] > alpha[t,1]:
-    m_l_s.append("sunny")
-  else:
-    m_l_s.append("rainy")  
-
-print("Thye most likely sequence of weather states is :",m_l_s)
 
 ```
 
